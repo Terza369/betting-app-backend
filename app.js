@@ -12,7 +12,7 @@ const app = express();
 
 var corsOptions = {
     origin: 'https://betting-app-frontend.herokuapp.com',
-    optionsSuccessStatus: 200 // For legacy browser support
+    optionsSuccessStatus: 200
 }
 
 app.use(cors(corsOptions));
