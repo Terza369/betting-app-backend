@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 
 const dbConnection = require('./database/connection');
 const errorHandler = require('./errors/errorHandler');
@@ -8,6 +9,13 @@ const tournament = require('./tournament');
 const match = require('./match');
 
 const app = express();
+
+var corsOptions = {
+    origin: 'https://betting-app-frontend.herokuapp.com',
+    optionsSuccessStatus: 200 // For legacy browser support
+}
+
+app.use(cors(corsOptions));
 
 app.use(bodyParser.json());
 
