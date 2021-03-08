@@ -10,25 +10,12 @@ const match = require('./match');
 
 const app = express();
 
-/* let whitelist = ['https://betting-app-frontend.herokuapp.com', 'http://localhost:8080']
-let corsOptions = {
-  origin: function (origin, callback) {
-    if (whitelist.indexOf(origin) !== -1) {
-      callback(null, true)
-    } else {
-      callback(new Error('Not allowed by CORS'))
-    }
-  }
-} */
-
 let corsOptions = {
   "origin": "*",
   "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
   "preflightContinue": false,
   "optionsSuccessStatus": 200
 }
-
-app.use(cors(corsOptions))
 
 app.use(cors(corsOptions));
 
