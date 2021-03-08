@@ -21,7 +21,14 @@ let corsOptions = {
   }
 } */
 
-app.use(cors())
+let corsOptions = {
+  "origin": "*",
+  "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+  "preflightContinue": false,
+  "optionsSuccessStatus": 200
+}
+
+app.use(cors(corsOptions))
 
 app.use(cors(corsOptions));
 
