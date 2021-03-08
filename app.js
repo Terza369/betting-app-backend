@@ -10,9 +10,7 @@ const match = require('./match');
 
 const app = express();
 
-'https://betting-app-frontend.herokuapp.com'
-
-let whitelist = ['https://betting-app-frontend.herokuapp.com', 'http://localhost:8080']
+/* let whitelist = ['https://betting-app-frontend.herokuapp.com', 'http://localhost:8080']
 let corsOptions = {
   origin: function (origin, callback) {
     if (whitelist.indexOf(origin) !== -1) {
@@ -21,7 +19,9 @@ let corsOptions = {
       callback(new Error('Not allowed by CORS'))
     }
   }
-}
+} */
+
+app.use(cors())
 
 app.use(cors(corsOptions));
 
