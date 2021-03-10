@@ -3,6 +3,8 @@ const { validationResult } = require('express-validator')
 
 const Match = require('./data');
 const MatchService = require('./service');
+const Sport = require('../sport/data');
+const Tournament = require('../tournament/data');
 
 exports.getMatches = (req, res, next) => {
     console.log('GET /matches');
@@ -18,6 +20,85 @@ exports.getMatches = (req, res, next) => {
         })
         .catch(err => next(err))
 
+}
+
+exports.getEverything = (req, res, next) => {
+    console.log('GET /matches/everything');
+
+    Match.fetchCounter++;
+
+    let {skip, limit, fields, populate, reset} = req.query;
+    skip = MatchService.parseSkip(skip);
+    limit = MatchService.parseLimit(limit);
+    fields = MatchService.parseFields(fields, populate);
+
+    const sports = Sport.getAll();
+    const tournaments = Tournament.getAll();
+    const matches = Match.getAll(skip, limit, fields, populate);
+
+    Promise.all([sports, tournaments, matches])
+        .then(result => {
+            let sports = result[0];
+            let tournaments = result[1];
+            let matches = result[2];
+
+            if(reset) {
+                matches.forEach(match => {
+                    let newTime = (new Date()).setSeconds((Math.random() * (60 - 1) + 1));
+                    Match.update(match._id, {startTime: new Date(newTime)});
+                })
+            }
+
+            matches = MatchService.addVirtualProps(matches);
+
+            sports = MatchService.getUniqueSports(sports, matches);
+
+            tournaments = MatchService.getUniqueTournaments(tournaments, matches);
+
+            tournaments.forEach(tournament => {
+                tournament.matches = matches.filter(match => match.tournamentId.toString() === tournament._id.toString());
+            })
+
+            sports.forEach(sport => {
+                sport.tournaments = tournaments.filter(tournament => tournament.sportId.toString() === sport._id.toString());
+            });
+
+            sports.sort((a, b) => {
+                return a.priority - b.priority;
+            });
+
+            sports.forEach(sport => {
+                sport.tournaments.sort((a, b) => {
+                    return a.priority - b.priority;
+                })
+            })
+
+            sports.forEach(sport => {
+                sport.tournaments.forEach(tournament => {
+                    tournament.matches.sort((a, b) => {
+                        return new Date(a.startTime) - new Date(b.startTime);
+                    })
+                })
+            })
+
+            res.status(200).json(sports);
+
+        })
+        .catch(err => next(err))
+}
+
+exports.increment = (req, res, next) => {
+    console.log('PUT /matches/everything/increment');
+
+    req.body.forEach(sport => {
+        sport.tournaments.forEach(tournament => {
+            tournament.matches.forEach((match, index) => {
+                tournament.matches[index] = MatchService.incrementScores(match);
+            })
+        });
+    });
+
+    res.status(200).json(req.body);
 }
 
 exports.getMatchById = (req, res, next) => {

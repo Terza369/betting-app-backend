@@ -4,6 +4,11 @@ const matchController = require('./controller');
 const { postValidator, putValidator } = require('../middleware/isValid');
 
 router.get('/', matchController.getMatches);
+
+router.get('/everything', matchController.getEverything);
+
+router.put('/everything/increment', matchController.increment);
+
 router.get('/:id', matchController.getMatchById);
 
 router.post('/', postValidator, matchController.createMatch);

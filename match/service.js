@@ -41,4 +41,71 @@ module.exports = class MatchService {
         odds = Math.round((odds) * 100) / 100;
         return odds;
     }
+
+    static addVirtualProps(matches) {
+        matches.map(match => {
+
+            let startTime = new Date(match.startTime);
+            let timePassed = Date.now() - startTime;
+            timePassed = Math.floor(timePassed / 60000);
+            timePassed = Math.max(timePassed, 0);
+    
+            if(timePassed > match.duration) {
+              match.finished = true;
+              match.minute = match.duration
+            } else {
+              match.finished = false;
+              match.minute = timePassed; 
+            }
+
+            match.score = [0, 0];
+    
+            return match;
+        });
+
+        return matches;
+    }
+
+    static getUniqueSports(sports, matches) {
+        let uniqueSportIds = matches.map(match => match.sportId.toString());
+        uniqueSportIds = [...new Set(uniqueSportIds)];
+
+        let uniqueSports = [];
+        uniqueSportIds.forEach(uniqueSportId => {
+            sports.forEach(sport => {
+            if(sport._id.toString() === uniqueSportId.toString()) {
+                uniqueSports.push(sport);
+            }
+            })
+        });
+
+        return uniqueSports;
+    }
+
+    static getUniqueTournaments(tournaments, matches) {
+        let uniqueTournamentIds = matches.map(match => match.tournamentId.toString());
+        uniqueTournamentIds = [...new Set(uniqueTournamentIds)];
+
+
+        let uniqueTournaments = [];
+        uniqueTournamentIds.forEach(uniqueTournamentId => {
+            tournaments.forEach(tournament => {
+            if(tournament._id.toString() === uniqueTournamentId.toString()) {
+                uniqueTournaments.push(tournament);
+            }
+            })
+        });
+
+        return uniqueTournaments;
+    }
+
+    static incrementScores(match) {
+        if(new Date(match.startTime) > new Date() || match.finished) {
+            return match;
+        } else {
+            let teamSelector = Math.round(Math.random());
+            match.score[teamSelector] += 1;
+            return match;
+        }
+    }
 }
