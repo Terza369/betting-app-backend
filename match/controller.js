@@ -47,7 +47,9 @@ exports.getEverything = (req, res, next) => {
                 })
             }
 
-            matches = MatchService.addVirtualProps(matches);
+            matches = MatchService.calculateMinutes(matches);
+
+            matches = MatchService.resetScore(matches);
 
             sports = MatchService.getUniqueSports(sports, matches);
 

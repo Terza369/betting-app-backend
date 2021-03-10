@@ -42,8 +42,8 @@ module.exports = class MatchService {
         return odds;
     }
 
-    static addVirtualProps(matches) {
-        matches.map(match => {
+    static calculateMinutes(matches) {
+        return matches.map(match => {
 
             let startTime = new Date(match.startTime);
             let timePassed = Date.now() - startTime;
@@ -57,13 +57,16 @@ module.exports = class MatchService {
               match.finished = false;
               match.minute = timePassed; 
             }
-
-            match.score = [0, 0];
     
             return match;
         });
+    }
 
-        return matches;
+    static resetScore(matches) {
+        return matches.map(match => {
+            match.score = [0, 0];
+            return match;
+        });
     }
 
     static getUniqueSports(sports, matches) {
