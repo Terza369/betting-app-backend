@@ -42,31 +42,26 @@ module.exports = class MatchService {
         return odds;
     }
 
-    static calculateMinutes(matches) {
-        return matches.map(match => {
+    static calculateMinutes(match) {
+        let startTime = new Date(match.startTime);
+        let timePassed = Date.now() - startTime;
+        timePassed = Math.floor(timePassed / 60000);
+        timePassed = Math.max(timePassed, 0);
 
-            let startTime = new Date(match.startTime);
-            let timePassed = Date.now() - startTime;
-            timePassed = Math.floor(timePassed / 60000);
-            timePassed = Math.max(timePassed, 0);
-    
-            if(timePassed > match.duration) {
-              match.finished = true;
-              match.minute = match.duration
-            } else {
-              match.finished = false;
-              match.minute = timePassed; 
-            }
-    
-            return match;
-        });
+        if(timePassed > match.duration) {
+            match.finished = true;
+            match.minute = match.duration
+        } else {
+            match.finished = false;
+            match.minute = timePassed; 
+        }
+
+        return match;
     }
 
-    static resetScore(matches) {
-        return matches.map(match => {
-            match.score = [0, 0];
-            return match;
-        });
+    static resetScore(match) {
+        match.score = [0, 0];
+        return match;
     }
 
     static getUniqueSports(sports, matches) {

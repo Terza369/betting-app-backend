@@ -47,9 +47,10 @@ exports.getEverything = (req, res, next) => {
                 })
             }
 
-            matches = MatchService.calculateMinutes(matches);
-
-            matches = MatchService.resetScore(matches);
+            matches = matches.map(match => {
+                match = MatchService.calculateMinutes(match);
+                match = MatchService.resetScore(match);
+            });
 
             sports = MatchService.getUniqueSports(sports, matches);
 
@@ -94,6 +95,7 @@ exports.increment = (req, res, next) => {
         sport.tournaments.forEach(tournament => {
             tournament.matches.forEach((match, index) => {
                 tournament.matches[index] = MatchService.incrementScores(match);
+                tournament.matches[index] = MatchService.calculateMinutes(match);
             })
         });
     });
