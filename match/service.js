@@ -106,4 +106,39 @@ module.exports = class MatchService {
             return match;
         }
     }
+
+    static sortAndStructure(sports, tournaments, matches) {
+
+        sports = MatchService.getUniqueSports(sports, matches);
+
+        tournaments = MatchService.getUniqueTournaments(tournaments, matches);
+
+        tournaments.forEach(tournament => {
+            tournament.matches = matches.filter(match => match.tournamentId.toString() === tournament._id.toString());
+        })
+
+        sports.forEach(sport => {
+            sport.tournaments = tournaments.filter(tournament => tournament.sportId.toString() === sport._id.toString());
+        });
+
+        sports.sort((a, b) => {
+            return a.priority - b.priority;
+        });
+
+        sports.forEach(sport => {
+            sport.tournaments.sort((a, b) => {
+                return a.priority - b.priority;
+            })
+        })
+
+        sports.forEach(sport => {
+            sport.tournaments.forEach(tournament => {
+                tournament.matches.sort((a, b) => {
+                    return new Date(a.startTime) - new Date(b.startTime);
+                })
+            })
+        })
+
+        return sports;
+    }
 }

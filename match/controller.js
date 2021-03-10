@@ -39,51 +39,45 @@ exports.getEverything = (req, res, next) => {
             let sports = result[0];
             let tournaments = result[1];
             let matches = result[2];
-
+            
             if(reset) {
+                let promiseArray = [];
                 matches.forEach(match => {
                     let newTime = (new Date()).setSeconds((Math.random() * (60 - 1) + 1));
-                    Match.update(match._id, {startTime: new Date(newTime)});
+                    promiseArray.push(Match.update(match._id, {startTime: new Date(newTime)}));
                 })
-            }
-
-            matches = matches.map(match => {
-                match = MatchService.calculateMinutes(match);
-                match = MatchService.resetScore(match);
-            });
-
-            sports = MatchService.getUniqueSports(sports, matches);
-
-            tournaments = MatchService.getUniqueTournaments(tournaments, matches);
-
-            tournaments.forEach(tournament => {
-                tournament.matches = matches.filter(match => match.tournamentId.toString() === tournament._id.toString());
-            })
-
-            sports.forEach(sport => {
-                sport.tournaments = tournaments.filter(tournament => tournament.sportId.toString() === sport._id.toString());
-            });
-
-            sports.sort((a, b) => {
-                return a.priority - b.priority;
-            });
-
-            sports.forEach(sport => {
-                sport.tournaments.sort((a, b) => {
-                    return a.priority - b.priority;
-                })
-            })
-
-            sports.forEach(sport => {
-                sport.tournaments.forEach(tournament => {
-                    tournament.matches.sort((a, b) => {
-                        return new Date(a.startTime) - new Date(b.startTime);
+                
+                Promise.all(promiseArray)
+                    .then(() => {
+                        return Match.getAll(skip, limit, fields, populate);
                     })
-                })
-            })
-
-            res.status(200).json(sports);
-
+                    .then(matches => {
+                        matches = matches.map(match => {
+                            match = MatchService.calculateMinutes(match);
+                            match = MatchService.resetScore(match);
+                            return match;
+                        });
+            
+                        sports = MatchService.sortAndStructure(sports, tournaments, matches);
+            
+                        res.status(200).json(sports);
+                    })
+                    .catch(err => next(err))
+            } else {
+                Match.getAll(skip, limit, fields, populate)
+                    .then(matches => {
+                        matches = matches.map(match => {
+                            match = MatchService.calculateMinutes(match);
+                            match = MatchService.resetScore(match);
+                            return match;
+                        });
+            
+                        sports = MatchService.sortAndStructure(sports, tournaments, matches);            
+            
+                        res.status(200).json(sports);
+                    })
+                    .catch(err => next(err))
+            }
         })
         .catch(err => next(err))
 }
@@ -91,14 +85,20 @@ exports.getEverything = (req, res, next) => {
 exports.increment = (req, res, next) => {
     console.log('PUT /matches/everything/increment');
 
+    console.log('1:');
+    console.log(req.body[0].tournaments[0].matches[0].score);
+
     req.body.forEach(sport => {
         sport.tournaments.forEach(tournament => {
             tournament.matches.forEach((match, index) => {
-                tournament.matches[index] = MatchService.incrementScores(match);
                 tournament.matches[index] = MatchService.calculateMinutes(match);
+                tournament.matches[index] = MatchService.incrementScores(match);
             })
         });
     });
+
+    console.log('2:');
+    console.log(req.body[0].tournaments[0].matches[0].score);
 
     res.status(200).json(req.body);
 }
