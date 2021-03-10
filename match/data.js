@@ -13,7 +13,6 @@ module.exports = class Match {
     }
 
     static _collectionName = 'matches';
-    static fetchCounter = 0;
 
     static getAll(skip, limit, fields, populate) {
         if(populate) {

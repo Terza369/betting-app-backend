@@ -25,8 +25,6 @@ exports.getMatches = (req, res, next) => {
 exports.getEverything = (req, res, next) => {
     console.log('GET /matches/everything');
 
-    Match.fetchCounter++;
-
     let {skip, limit, fields, populate, reset} = req.query;
     skip = MatchService.parseSkip(skip);
     limit = MatchService.parseLimit(limit);
